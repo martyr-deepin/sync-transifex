@@ -3,4 +3,4 @@ build:
 	docker tag -f sync-transifex:latest sync-transifex:20151229-01
 
 run:
-	docker-compose run --rm sync-transifex ${ACTION} ${SYNC_PROJECT} ${SYNC_BRANCH}
+	docker-compose run --rm sync-transifex ${ACTION} ${GERRIT_PROJECT} ${GERRIT_BRANCH}
