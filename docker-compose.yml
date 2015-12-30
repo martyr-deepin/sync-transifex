@@ -3,6 +3,7 @@ sync-transifex:
     image: sync-transifex:${IMAGE_TAG}
     environment: 
         - SSH_AUTH_SOCK=${SSH_AUTH_SOCK}
+        - TX_USER=${TX_USER}
         - TX_PASSWORD=${TX_PASSWORD}
     volumes:
         - ${SSH_AUTH_SOCK}:${SSH_AUTH_SOCK}

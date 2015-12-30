@@ -1,4 +1,3 @@
 GERRIT_HOST=cr.deepin.io
 GERRIT_USER=transifex
 TX_HOST=https://www.transifex.com
-TX_USER=deepin_transifex
