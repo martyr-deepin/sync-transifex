@@ -7,5 +7,5 @@ sync-transifex:
         - TX_PASSWORD=${TX_PASSWORD}
     volumes:
         - ${SSH_AUTH_SOCK}:${SSH_AUTH_SOCK}
-    entrypoint: ["bash", "-ex", "sync_po.sh"]
+    entrypoint: ["bash", "-e", "sync_po.sh"]
 
