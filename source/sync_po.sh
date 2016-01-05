@@ -1,9 +1,36 @@
-#!/bin/bash -ex
+#!/bin/bash -e
 
 source config
 hook_file=$(pwd)/commit-msg
 
 BRANCH_NAME=sync_transifex
+
+function transfer_jenkins_env(){
+    case "$1" in
+    UploadPot)
+        action="upload"
+        ;;
+    DownloadPo)
+        action="download"
+        ;;
+    *)
+        usage
+        ;;
+    esac
+
+    _IFS=$IFS
+    IFS='@'
+    if [ -n "${GERRIT_PROJECT}" ] && [ -n "${GERRIT_BRANCH}" ]; then
+        project=${GERRIT_PROJECT}
+        branch=${GERRIT_BRANCH}
+    else
+        arr=($PROJECT)
+        project=${arr[0]}
+        branch=${arr[1]}
+    fi
+    IFS=$_IFS
+}
+
 
 try_download_CL()
 {
@@ -70,6 +97,14 @@ download()
 
 init()
 {
+    # init param
+    if [ $# == 1 ];then
+        transfer_jenkins_env $@
+    else
+        echo "param not suport"
+        usage
+    fi
+
     # git-review
     mkdir -p ~/.config/git-review
     echo "[gerrit]
@@ -105,25 +140,14 @@ upload()
     rm -rf $tmpDir
 }
 
-usage() { echo "Usage: $0 [ -u | -d ] gerrit_project [gerrit_branch] " 1>&2; exit 1; }
+usage() { echo "Usage: $0 action " 1>&2; exit 1; }
 
-init
 
 declare action
-while getopts "ud" o; do
-    case "${o}" in
-	u)
-	    action="upload"
-	    ;;
-	d)
-	    action="download"
-	    ;;
-	*)
-	    usage
-	    ;;
-    esac
-done
-shift $((OPTIND-1))
+declare project
+declare branch
+
+init $@
 
 echo Action $action
 if [ ! -n "$action" ]; then
@@ -135,14 +159,14 @@ case $action in
 	if [ ! -n "$1" ]; then
         echo "project name must be specified" 1>&2; exit 1
 	else
-	    upload $1 $2
+	    upload $project $branch
 	fi
 	;;
     "download")
 	if [ ! -n "$1" ]; then
         echo "project name must be specified" 1>&2; exit 1
 	else
-	    download $1 $2
+	    download $project $branch
 	fi
 	;;
 esac

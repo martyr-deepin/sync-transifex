@@ -5,6 +5,9 @@ sync-transifex:
         - SSH_AUTH_SOCK=${SSH_AUTH_SOCK}
         - TX_USER=${TX_USER}
         - TX_PASSWORD=${TX_PASSWORD}
+        - PROJECT=${PROJECT}
+        - GERRIT_PROJECT=${GERRIT_PROJECT}
+        - GERRIT_BRANCH=${GERRIT_BRANCH}
     volumes:
         - ${SSH_AUTH_SOCK}:${SSH_AUTH_SOCK}
     entrypoint: ["bash", "-e", "sync_po.sh"]
