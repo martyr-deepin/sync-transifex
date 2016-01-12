@@ -80,12 +80,14 @@ download()
 
     if try_download_CL $prj; then
         tx pull -f -a
-        git add *.po *.ts
+        find -name "*.po" | xargs -n1 git add
+        find -name "*.ts" | xargs -n1 git add
         git commit -a --amend --no-edit
     else
         git checkout -b "$BRANCH_NAME"
         tx pull -f -a
-        git add *.po *.ts
+        find -name "*.po" | xargs -n1 git add
+        find -name "*.ts" | xargs -n1 git add
         git commit -a -m "auto sync po files from transifex"
     fi
 
