@@ -45,7 +45,7 @@ try_download_CL()
 	1)
 	    CL=$(echo $json | jq '.[0]._number')
 	    echo "there found an exists CL $CL, using this CL to update POs"
-	    git review -d $(echo $json | jq '.[0]._number')
+	    git review -r origin -d $(echo $json | jq '.[0]._number')
 	    return 0
 	    ;;
 	*)
@@ -80,17 +80,17 @@ download()
 
     if try_download_CL $prj; then
         tx pull -f -a
-        git add *.po
+        git add *.po *.ts
         git commit -a --amend --no-edit
     else
         git checkout -b "$BRANCH_NAME"
         tx pull -f -a
-        git add *.po
+        git add *.po *.ts
         git commit -a -m "auto sync po files from transifex"
     fi
 
     git remote set-url origin $gitDir
-    git review -f $branch
+    git review -r origin -f $branch
     cd $savedDir
     rm -rf $tmpDir
 }
@@ -105,13 +105,15 @@ init()
         usage
     fi
 
-    # git-review
-    mkdir -p ~/.config/git-review
-    echo "[gerrit]
-defaultremote = origin" > ~/.config/git-review/git-review.conf
-
     # transifex
-    tx init --host=${TX_HOST} --user=${TX_USER} --pass=${TX_PASSWORD}
+    cat > ~/.transifexrc <<EOF
+[${TX_HOST}]
+hostname = ${TX_HOST}
+password = ${TX_PASSWORD}
+token = 
+username = ${TX_USER}
+EOF
+
 }
 
 upload()
