@@ -1,6 +1,6 @@
 sync-transifex:
     container_name: sync-transifex
-    image: sync-transifex:${IMAGE_TAG}
+    image: hub.deepin.io/deepin/sync-transifex:${IMAGE_TAG}
     environment: 
         - SSH_AUTH_SOCK=${SSH_AUTH_SOCK}
         - TX_USER=${TX_USER}
