@@ -79,13 +79,14 @@ download()
     fi
 
     if try_download_CL $prj; then
-        tx pull -f -a
+        # Set minimum percent of resource to 1
+        tx pull -f -a --minimum-perc=1
         find -name "*.po" | xargs -n1 git add
         find -name "*.ts" | xargs -n1 git add
         git commit -a --amend --no-edit
     else
         git checkout -b "$BRANCH_NAME"
-        tx pull -f -a
+        tx pull -f -a --minimum-perc=1
         find -name "*.po" | xargs -n1 git add
         find -name "*.ts" | xargs -n1 git add
         git commit -a -m "auto sync po files from transifex"
