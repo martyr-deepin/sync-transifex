@@ -67,7 +67,7 @@ download()
     rm -rf $tmpDir
     git clone $gitDir $tmpDir
     cd $tmpDir
-    git config user.email "transifex@linuxdeepin.com"
+    git config user.email "transifex@deepin.com"
     git config user.name "transifex"
     cp $hook_file .git/hooks
 
