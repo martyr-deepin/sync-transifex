@@ -1,7 +1,7 @@
 sync-transifex:
     container_name: sync-transifex
     image: hub.deepin.io/deepin/sync-transifex:${IMAGE_TAG}
-    environment: 
+    environment:
         - SSH_AUTH_SOCK=${SSH_AUTH_SOCK}
         - TX_USER=${TX_USER}
         - TX_PASSWORD=${TX_PASSWORD}
@@ -12,3 +12,16 @@ sync-transifex:
         - ${SSH_AUTH_SOCK}:${SSH_AUTH_SOCK}
     entrypoint: ["bash", "-e", "sync_po.sh"]
 
+sync-transifex-all:
+    container_name: sync-transifex-all
+    image: hub.deepin.io/deepin/sync-transifex:${IMAGE_TAG}
+    environment:
+        - SSH_AUTH_SOCK=${SSH_AUTH_SOCK}
+        - TX_USER=${TX_USER}
+        - TX_PASSWORD=${TX_PASSWORD}
+        - PROJECT=${PROJECT}
+        - GERRIT_PROJECT=${GERRIT_PROJECT}
+        - GERRIT_BRANCH=${GERRIT_BRANCH}
+    volumes:
+        - ${SSH_AUTH_SOCK}:${SSH_AUTH_SOCK}
+    entrypoint: ["bash", "-e", "downloadall.sh"]
