@@ -1,5 +1,5 @@
 #!/bin/bash
 while read project
 do
-	PROJECT=$project make run|| echo "$project download failed"
+	PROJECT=$project docker-compose run --rm sync-transifex DownloadPo|| echo "$project download failed"
 done < project.list
