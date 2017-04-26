@@ -1,5 +1,4 @@
 #!/bin/bash
-PROJECT= bash sync_po.sh DownloadPo|| echo "$project_name download failed"
 PROJECT=dde/dde-control-center@master bash sync_po.sh DownloadPo|| echo "download failed"
 PROJECT=dde/dde-daemon@master bash sync_po.sh DownloadPo|| echo "download failed"
 PROJECT=dde/dde-launcher@master bash sync_po.sh DownloadPo|| echo "download failed"
