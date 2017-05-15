@@ -44,8 +44,9 @@ try_download_CL()
 	    ;;
 	1)
 	    CL=$(echo $json | jq '.[0]._number')
-	    echo "there found an exists CL $CL, using this CL to update POs"
+	    echo "there found an exists CL $CL, using this CL to update POs and rebase on $BRANCH_NAME"
 	    git review -r origin -d $(echo $json | jq '.[0]._number')
+	    git rebase "$BRANCH_NAME"
 	    return 0
 	    ;;
 	*)
