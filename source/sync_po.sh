@@ -5,6 +5,18 @@ hook_file=$(pwd)/commit-msg
 
 BRANCH_NAME=sync_transifex
 
+function ts2desktop() {
+  echo "support deepin ts2desktop"
+  if [ -f .tx/ts2desktop ]; then
+    source .tx/ts2desktop
+    deepin-desktop-ts-convert ts2desktop $DESKTOP_SOURCE_FILE $DESKTOP_TS_DIR $DESKTOP_TEMP_FILE
+    mv $DESKTOP_TEMP_FILE $DESKTOP_DEST_FILE
+    find -name "*.desktop" | xargs -n1 git add
+  else
+    echo "no .tx/ts2desktop file, skip..."
+  fi
+}
+
 function transfer_jenkins_env(){
     case "$1" in
     UploadPot)
@@ -82,6 +94,9 @@ download()
     if try_download_CL $prj; then
         # Set minimum percent of resource to 1
         tx pull -f -a --minimum-perc=1
+
+        ts2desktop
+
         find -name "*.po" | xargs -n1 git add
         find -name "*.ts" | xargs -n1 git add
         git commit -a --amend --no-edit
@@ -89,13 +104,7 @@ download()
         git checkout -b "$BRANCH_NAME"
         tx pull -f -a --minimum-perc=1
 
-        # support deepin ts2desktop
-        if [ -f .tx/ts2desktop ]; then
-          source .tx/ts2desktop
-          deepin-desktop-ts-convert ts2desktop $DESKTOP_SOURCE_FILE $DESKTOP_TS_DIR $DESKTOP_TEMP_FILE
-          mv $DESKTOP_TEMP_FILE $DESKTOP_DEST_FILE
-          find -name "*.desktop" | xargs -n1 git add
-        fi
+        ts2desktop
 
         find -name "*.po" | xargs -n1 git add
         find -name "*.ts" | xargs -n1 git add
