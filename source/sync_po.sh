@@ -88,6 +88,15 @@ download()
     else
         git checkout -b "$BRANCH_NAME"
         tx pull -f -a --minimum-perc=1
+
+        # support deepin ts2desktop
+        if [ -f .tx/ts2desktop ]; then
+          source .tx/ts2desktop
+          deepin-desktop-ts-convert ts2desktop $DESKTOP_SOURCE_FILE $DESKTOP_TS_DIR $DESKTOP_TEMP_FILE
+          mv $DESKTOP_TEMP_FILE $DESKTOP_DEST_FILE
+          find -name "*.desktop" | xargs -n1 git add
+        fi
+
         find -name "*.po" | xargs -n1 git add
         find -name "*.ts" | xargs -n1 git add
         git commit -a -m "auto sync po files from transifex"
@@ -114,7 +123,7 @@ init()
 [${TX_HOST}]
 hostname = ${TX_HOST}
 password = ${TX_PASSWORD}
-token = 
+token =
 username = ${TX_USER}
 EOF
 
@@ -176,4 +185,3 @@ case $action in
 	fi
 	;;
 esac
-
