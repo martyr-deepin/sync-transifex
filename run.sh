@@ -1,5 +1,5 @@
-#!/bin/bash -ex
-docker run --rm -it \
+#!/bin/bash
+docker run --rm \
 	-e SSH_AUTH_SOCK=$SSH_AUTH_SOCK \
 	-e TX_USER=$TX_USER \
 	-e TX_PASSWORD=$TX_PASSWORD \
