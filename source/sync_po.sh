@@ -5,6 +5,10 @@ hook_file=$(pwd)/commit-msg
 
 BRANCH_NAME=sync_transifex
 
+show_git_log(){
+    git log --pretty=oneline -n $1
+}
+
 function ts2desktop() {
   echo "support deepin ts2desktop"
   if [ -f .tx/ts2desktop ]; then
@@ -56,9 +60,10 @@ try_download_CL()
 	    ;;
 	1)
 	    CL=$(echo $json | jq '.[0]._number')
-	    echo "there found an exists CL $CL, using this CL to update POs and rebase on $BRANCH_NAME"
+	    echo "there found an exists CL $CL, using this CL to update POs and rebase on $branch"
 	    git review -r origin -d $(echo $json | jq '.[0]._number')
-	    git rebase "$BRANCH_NAME"
+	    git rebase $branch
+	    show_git_log 3
 	    return 0
 	    ;;
 	*)
@@ -111,6 +116,7 @@ download()
         git commit -a -m "auto sync po files from transifex"
     fi
 
+    show_git_log 20
     git remote set-url origin $gitDir
     git review -r origin -f $branch
     cd $savedDir
