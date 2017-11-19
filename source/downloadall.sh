@@ -28,4 +28,5 @@ PROJECT=deepin-movie-reborn@master bash sync_po.sh DownloadPo|| echo "download f
 PROJECT=deepin-picker@master bash sync_po.sh DownloadPo|| echo "download failed"
 PROJECT=deepin-system-monitor@master bash sync_po.sh DownloadPo|| echo "download failed"
 PROJECT=deepin-calculator@master bash sync_po.sh DownloadPo|| echo "download failed"
+PROJECT=dtkwidget@master bash sync_po.sh DownloadPo|| echo "download failed"
 PROJECT=private/deepin-cloud-print-client@master bash sync_po.sh DownloadPo|| echo "download failed"
