@@ -1,5 +1,9 @@
 #!/bin/bash -e
-
+apt-get update && apt-get -y install python3
+echo "deb http://pools.corp.deepin.com/deepin unstable main" >> /etc/apt/sources.list
+apt-get update && apt-get -y install deepin-gettext-tools
+sed -i '$d' /etc/apt/sources.list
+apt-get update
 source config
 hook_file=$(pwd)/commit-msg
 
