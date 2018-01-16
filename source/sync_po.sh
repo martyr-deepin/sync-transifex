@@ -20,6 +20,36 @@ function ts2desktop() {
   fi
 }
 
+function merge_desktop {
+    crudini --get .tx/config | while read sel
+    do
+        if [ "$sel" == "main" ];then
+            continue
+        fi
+        txtype=$(crudini --get .tx/config $sel "type")
+        if [ "$txtype" == "DESKTOP" ];then
+            source_file=$(crudini --get .tx/config $sel "source_file")
+            tx_path=$(basename $source_file)
+            find .tx/$tx_path -type f | while read f
+            do
+                crudini --merge $source_file < $f 
+                git add $f
+            done
+            git add $source_file
+        fi
+    done
+}
+
+function tx_pull() {
+    tx pull -f -a --minimum-perc=1
+
+    ts2desktop
+    merge_desktop
+
+    find -name "*.po" | xargs -n1 git add
+    find -name "*.ts" | xargs -n1 git add
+}
+
 function transfer_jenkins_env(){
     case "$1" in
     UploadPot)
@@ -97,21 +127,11 @@ download()
 
     if try_download_CL $prj; then
         # Set minimum percent of resource to 1
-        tx pull -f -a --minimum-perc=1
-
-        ts2desktop
-
-        find -name "*.po" | xargs -n1 git add
-        find -name "*.ts" | xargs -n1 git add
+        tx_pull
         git commit -a --amend --no-edit
     else
         git checkout -b "$BRANCH_NAME"
-        tx pull -f -a --minimum-perc=1
-
-        ts2desktop
-
-        find -name "*.po" | xargs -n1 git add
-        find -name "*.ts" | xargs -n1 git add
+        tx_pull
         git commit -a -m "auto sync po files from transifex"
     fi
 
