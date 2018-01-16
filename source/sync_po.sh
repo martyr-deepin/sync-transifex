@@ -184,7 +184,7 @@ upload()
         return
     fi
 
-    tx push -s
+    tx push -s --skip -l en
     cd $savedDir
     rm -rf $tmpDir
 }
