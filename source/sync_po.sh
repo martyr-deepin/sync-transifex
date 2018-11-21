@@ -203,6 +203,8 @@ if [ ! -n "$action" ]; then
     echo "action must be specified" 1>&2; exit 1
 fi
 
+echo "using transifex-client version: " $(tx --version)
+
 case $action in
     "upload")
 	if [ ! -n "$1" ]; then
