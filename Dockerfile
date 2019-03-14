@@ -1,3 +1,9 @@
+FROM hub.deepin.io/golang:1.12-alpine AS builder
+WORKDIR /root
+COPY src .
+RUN apk --no-cache add git
+RUN env CGO_ENABLED=0 go build -v -mod=readonly -o app ./cmd/app
+
 FROM daocloud.io/library/debian
 
 MAINTAINER electricface <songwentai@deepin.com>
@@ -10,13 +16,16 @@ RUN echo "deb http://pools.corp.deepin.com/deepin panda main contrib non-free" >
     && apt-get -y --allow-unauthenticated install deepin-gettext-tools \
     && sed -i '$d' /etc/apt/sources.list && apt-get update
 
-RUN mkdir -p /data /root/.ssh \
-    && ssh-keyscan -t rsa -p 29418 cr.deepin.io > ~/.ssh/known_hosts
+# install hub
+RUN cd /root \
+    && curl -o hub.tgz -L https://github.com/github/hub/releases/download/v2.10.0/hub-linux-amd64-2.10.0.tgz \
+    && tar axf hub.tgz \
+    && cd hub-linux-* \
+    && ./install \
+    && cd .. \
+    && rm -rf hub.tgz hub-linux-* \
+    && hub version
 
-# source
-COPY source /data/transifex
-
-WORKDIR /data/transifex
-
-#CMD ["bash", "-ex", "sync_po.sh"]
-
+WORKDIR /root
+COPY --from=builder /root/app .
+ENTRYPOINT ["/root/app"]
