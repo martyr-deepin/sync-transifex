@@ -1,8 +1,9 @@
-#!/bin/bash
+#!/bin/sh
+set -ex
 docker run --rm \
-	-e SSH_AUTH_SOCK=$SSH_AUTH_SOCK \
-	-e TX_USER=$TX_USER \
-	-e TX_PASSWORD=$TX_PASSWORD \
-	-e PROJECT=$PROJECT \
-	-v $SSH_AUTH_SOCK:$SSH_AUTH_SOCK \
-	hub.deepin.io/deepin/sync-transifex:$IMAGE_TAG bash -e sync_po.sh $ACTION
+    -e TX_USER=$TX_USER \
+    -e TX_PASSWORD=$TX_PASSWORD \
+    -e GITHUB_USER=$GITHUB_USER \
+    -e GITHUB_PASSWORD=$GITHUB_PASSWORD \
+    -e GITHUB_EMAIL=$GITHUB_EMAIL \
+    hub.deepin.io/deepin/sync-transifex:$IMAGE_TAG $@
