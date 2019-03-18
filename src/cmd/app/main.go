@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"errors"
 	"flag"
 	"fmt"
 	"io/ioutil"
@@ -17,9 +18,9 @@ var (
 	flagDebug   bool
 	flagPush    bool
 	flagPull    bool
-	flagForce bool
+	flagForce   bool
 	flagRepoDir string
-	flagOwner string
+	flagOwner   string
 )
 
 func init() {
@@ -93,8 +94,15 @@ func main() {
 
 func writeTransifexRc() error {
 	username := os.Getenv("TX_USER")
+	if username == "" {
+		return errors.New("not found env TX_USER")
+	}
 	password := os.Getenv("TX_PASSWORD")
-	str := fmt.Sprintf(`
+	if password == "" {
+		return errors.New("not found env TX_PASSWORD")
+	}
+
+	content := fmt.Sprintf(`
 [https://www.transifex.com]
 api_hostname = https://api.transifex.com
 hostname = https://www.transifex.com
@@ -102,35 +110,48 @@ username = %s
 password = %s
 `, username, password)
 	home := os.Getenv("HOME")
-	return ioutil.WriteFile(filepath.Join(home, ".transifexrc"), []byte(str), 0600)
-}
-
-func removeTransifexRc() error {
-	home := os.Getenv("HOME")
-	return os.Remove(filepath.Join(home, ".transifexrc"))
+	return ioutil.WriteFile(filepath.Join(home, ".transifexrc"), []byte(content), 0600)
 }
 
 func writeGitCredential() error {
 	username := os.Getenv("GITHUB_USER")
-	password := os.Getenv("GITHUB_PASSWORD")
-	str := fmt.Sprintf("https://%s:%s@github.com", username, password)
-	home := os.Getenv("HOME")
-	return ioutil.WriteFile(filepath.Join(home, ".git-credentials"), []byte(str), 0600)
-}
-
-func removeGitCredential() error {
-	home := os.Getenv("HOME")
-	return os.Remove(filepath.Join(home, ".git-credentials"))
-}
-
-func removeHubConfig() error {
-	home := os.Getenv("HOME")
-	err := os.Remove(filepath.Join(home, ".config/hub"))
-	if os.IsNotExist(err) {
-		// ignore not exist error
-		err = nil
+	if username == "" {
+		return errors.New("not found env GITHUB_USER")
 	}
-	return err
+	password := os.Getenv("GITHUB_PASSWORD")
+	if password == "" {
+		return errors.New("not found env GITHUB_PASSWORD")
+	}
+	content := fmt.Sprintf("https://%s:%s@github.com", username, password)
+	home := os.Getenv("HOME")
+	return ioutil.WriteFile(filepath.Join(home, ".git-credentials"), []byte(content), 0600)
+}
+
+func writeHubConfig() error {
+	home := os.Getenv("HOME")
+	user := os.Getenv("GITHUB_USER")
+	if user == "" {
+		return errors.New("not found env GITHUB_USER")
+	}
+	token := os.Getenv("GITHUB_TOKEN")
+	if token == "" {
+		return errors.New("not found env GITHUB_TOKEN")
+	}
+
+	err := os.Mkdir(filepath.Join(home, ".config"), 0700)
+	if err != nil {
+		if !os.IsExist(err) {
+			return err
+		}
+	}
+
+	filename := filepath.Join(home, ".config/hub")
+	content := fmt.Sprintf(`github.com:
+- user: %s
+  oauth_token: %s
+  protocol: https
+`, user, token)
+	return ioutil.WriteFile(filename, []byte(content), 0600)
 }
 
 // 上传翻译源文件
@@ -139,7 +160,6 @@ func pushTranslationSource(project, branch string) error {
 	if err != nil {
 		return err
 	}
-	defer removeTransifexRc()
 
 	dir := filepath.Join(flagRepoDir, project)
 	err = os.RemoveAll(dir)
@@ -172,7 +192,6 @@ func pullTranslationResult(project, branch string) error {
 	if err != nil {
 		return err
 	}
-	defer removeTransifexRc()
 
 	dir := filepath.Join(flagRepoDir, project)
 	err = os.RemoveAll(dir)
@@ -222,9 +241,9 @@ func pullTranslationResult(project, branch string) error {
 
 	githubUser := os.Getenv("GITHUB_USER")
 	configMap := map[string]string{
-		"user.name": githubUser,
-		"user.email": os.Getenv("GITHUB_EMAIL"),
-		"hub.protocol": "https",
+		"user.name":         githubUser,
+		"user.email":        os.Getenv("GITHUB_EMAIL"),
+		"hub.protocol":      "https",
 		"credential.helper": "store",
 	}
 	for key, value := range configMap {
@@ -238,19 +257,13 @@ func pullTranslationResult(project, branch string) error {
 	if err != nil {
 		return err
 	}
-	err = sh.Command("pkill","-e", "git-credential-").Run()
-	if err != nil {
-		log.Println("pkill err:", err)
-	}
 
-	err = removeHubConfig()
+	err = writeHubConfig()
 	if err != nil {
 		return err
 	}
 
-	defer removeGitCredential()
-
-	devBranch := branch +"+update-tr"
+	devBranch := branch + "+update-tr"
 	err = sh.Command("git", "checkout", "-b", devBranch).Run()
 	if err != nil {
 		return err
@@ -270,26 +283,26 @@ func pullTranslationResult(project, branch string) error {
 	}
 
 	// push devBranch to my fork repo
-	err = sh.Command("git", "push", "fork", devBranch + ":" + devBranch, "-f").Run()
+	err = sh.Command("git", "push", "fork", devBranch+":"+devBranch, "-f").Run()
 	if err != nil {
 		return err
 	}
 
-	prHead := githubUser+":"+devBranch
+	prHead := githubUser + ":" + devBranch
 	output, err := sh.Command("hub", "pr", "list",
 		"-h", prHead, "-b", branch, "-f", "%t%n").Output()
 	if bytes.Contains(output, []byte(commitMessage)) {
-			log.Println("has pull request")
+		log.Println("has pull request")
 
 	} else {
-			log.Println("create new pull request")
-			err = sh.Command("hub", "pull-request",
-				"-b", branch,
-				"-h", prHead,
-				"-m", commitMessage).Run()
-			if err != nil {
-				return err
-			}
+		log.Println("create new pull request")
+		err = sh.Command("hub", "pull-request",
+			"-b", branch,
+			"-h", prHead,
+			"-m", commitMessage).Run()
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
