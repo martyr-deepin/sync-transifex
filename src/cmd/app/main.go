@@ -373,7 +373,7 @@ func addFiles() error {
 
 		ext := filepath.Ext(info.Name())
 		switch ext {
-		case ".ts", ".po":
+		case ".ts", ".po", ".xlf":
 			log.Println("git add", path)
 			err = sh.Command("git", "add",
 				path).Run()
