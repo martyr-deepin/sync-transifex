@@ -1,7 +1,8 @@
 FROM hub.deepin.io/golang:1.12-alpine AS builder
 WORKDIR /root
 COPY src .
-RUN apk --no-cache add git
+RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.ustc.edu.cn/g' /etc/apk/repositories && \
+	apk --no-cache add git
 RUN env CGO_ENABLED=0 go build -v -mod=readonly -o app ./cmd/app
 
 FROM daocloud.io/library/debian
