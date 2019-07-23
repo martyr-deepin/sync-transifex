@@ -7,4 +7,4 @@ docker run --rm \
     -e GITHUB_PASSWORD=$GITHUB_PASSWORD \
     -e GITHUB_EMAIL=$GITHUB_EMAIL \
     -e GITHUB_TOKEN=$GITHUB_TOKEN \
-    hub.deepin.io/deepin/sync-transifex:$IMAGE_TAG $@
+    hub.deepin.com/om/sync-transifex:$IMAGE_TAG $@
